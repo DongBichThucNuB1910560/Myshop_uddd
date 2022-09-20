@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
 import 'order_manager.dart';
 import 'order_item_card.dart';
+import '../shared/app_drawer.dart';
 
-class OrderScreen extends StatelessWidget{
+class OrderScreen extends StatelessWidget {
+  static const routeName = '/orders';
   const OrderScreen({super.key});
-  @override 
-  Widget build(BuildContext context){
+  @override
+  Widget build(BuildContext context) {
     print('building orders');
     final ordersManager = OrderManager();
     return Scaffold(
-      appBar: AppBar(  
+      appBar: AppBar(
         title: const Text('Your Orders'),
       ),
+      drawer: const AppDrawer(),
       body: ListView.builder(
         itemCount: ordersManager.orderCount,
-        itemBuilder: (ctx, i)=> OrderItemCard(ordersManager.orders[i]),
+        itemBuilder: (ctx, i) => OrderItemCard(ordersManager.orders[i]),
       ),
     );
   }
