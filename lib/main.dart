@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:myshop/ui/orders/orders_screen.dart';
 import 'package:myshop/ui/products/user_products_screen.dart';
-
+import 'package:provider/provider.dart';
 import 'ui/screens.dart';
 
 // import 'ui/products/product_detail_screen.dart';
@@ -20,16 +20,22 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'My Shop',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-          fontFamily: 'Lato',
-          colorScheme:
-              ColorScheme.fromSwatch(primarySwatch: Colors.purple).copyWith(
-            secondary: Colors.deepOrange,
-          )),
-      home: const ProductsOverviewScreen(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (ctx) => ProductsManager(),
+        ),
+      ],
+      child: MaterialApp(
+        title: 'My Shop',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+            fontFamily: 'Lato',
+            colorScheme:
+                ColorScheme.fromSwatch(primarySwatch: Colors.purple).copyWith(
+              secondary: Colors.deepOrange,
+            )),
+        home: const ProductsOverviewScreen(),
         routes: {
           CartScreen.routeName: (ctx) => const CartScreen(),
           OrderScreen.routeName: (ctx) => const OrderScreen(),
@@ -41,13 +47,14 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute(
               builder: (ctx) {
                 return ProductDetailScreen(
-                  ProductManager().findById(productId),
+                  ctx.read<ProductsManager>().findById(productId),
                 );
               },
             );
           }
           return null;
         },
+      ),
     );
   }
 }
