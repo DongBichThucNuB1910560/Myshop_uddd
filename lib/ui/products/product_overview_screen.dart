@@ -3,7 +3,7 @@ import 'package:myshop/ui/screens.dart';
 import 'package:provider/provider.dart';
 import 'products_grid.dart';
 import '../shared/app_drawer.dart';
-import '../cart/cart_manager.dart';
+// import '../cart/cart_manager.dart';
 import 'top_right_badge.dart';
 
 enum FilterOptions { favorites, all }
@@ -12,11 +12,18 @@ class ProductsOverviewScreen extends StatefulWidget {
   const ProductsOverviewScreen({super.key});
 
   @override
-  State<ProductsOverviewScreen> createState() => _ProductsOverviewScreen();
+  State<ProductsOverviewScreen> createState() => _ProductsOverviewScreenState();
 }
 
-class _ProductsOverviewScreen extends State<ProductsOverviewScreen> {
-  var _showOnlyFavorites = false;
+class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
+  final _showOnlyFavorites = ValueNotifier<bool>(false);
+  late Future<void> _fetchProducts;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchProducts = context.read<ProductsManager>().fetchProducts();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +33,19 @@ class _ProductsOverviewScreen extends State<ProductsOverviewScreen> {
         actions: <Widget>[buildProductFilterMenu(), buildShoppingCartIcon()],
       ),
       drawer: const AppDrawer(),
-      body: ProductsGrid(_showOnlyFavorites),
+      body: FutureBuilder(
+        future: _fetchProducts,
+        builder:(context, snapshot){
+          if(snapshot.connectionState == ConnectionState.done){
+            return ValueListenableBuilder<bool>(valueListenable: _showOnlyFavorites , builder: (context, onlyFavorites, child){
+              return ProductsGrid(onlyFavorites);
+            });
+          }
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+      ),
     );
   }
 
@@ -53,9 +72,9 @@ class _ProductsOverviewScreen extends State<ProductsOverviewScreen> {
       onSelected: (FilterOptions selectedValue) {
         setState(() {
           if (selectedValue == FilterOptions.favorites) {
-            _showOnlyFavorites = true;
+            _showOnlyFavorites.value = true;
           } else {
-            _showOnlyFavorites = false;
+            _showOnlyFavorites.value = false;
           }
         });
       },
@@ -75,3 +94,18 @@ class _ProductsOverviewScreen extends State<ProductsOverviewScreen> {
     );
   }
 }
+
+// class _ProductsOverviewScreenState extends State<ProductsOverviewScreen>{
+//   final _showOnlyFavorites = ValueNotifier<bool>(false);
+//   late Future<void> _fetchProducts;
+
+//   @override 
+//   void initState(){
+//     super.initState();
+//     _fetchProducts = context.read<ProductsManager>().fetchProducts();
+//   }
+//   @override 
+//   Widget build(BuildContext context){
+
+//   }
+// }
