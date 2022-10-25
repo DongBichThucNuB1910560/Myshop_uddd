@@ -9,7 +9,7 @@ class ProductsManager with ChangeNotifier {
     // Product(
     //   id: 'p1',
     //   title: 'Red Shirt',
-    // description: 'A red shirt - it is pretty red!',
+    //   description: 'A red shirt - it is pretty red!',
     //   price: 29.99,
     //   imageUrl:
     //       'https://cdn.pixabay.com/photo/2016/10/02/22/17/red-t-shirt-1710578_1280.jpg',
@@ -98,17 +98,21 @@ class ProductsManager with ChangeNotifier {
     }
   }
 
-  void togglefavoriteStatus(Product product) {
+  Future<void> toggleFavoriteStatus(Product product) async {
     final savedStatus = product.isFavorite;
     product.isFavorite = !savedStatus;
+
+    if (!await _productsService.saveFavoriteStatus(product)) {
+      product.isFavorite = savedStatus;
+    }
   }
 
-  Future<void> deleteProduct(String id) async{
+  Future<void> deleteProduct(String id) async {
     final index = _items.indexWhere((item) => item.id == id);
     Product? existingProduct = _items[index];
     _items.removeAt(index);
     notifyListeners();
-    if(!await _productsService.deleteProduct(id)){
+    if (!await _productsService.deleteProduct(id)) {
       _items.insert(index, existingProduct);
       notifyListeners();
     }
